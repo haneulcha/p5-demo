@@ -1,24 +1,49 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useRef } from "react";
+import p5 from "p5";
+import rendererP5, { setDimensions } from "./renderer/index";
+import "./App.css";
 
 function App() {
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<ResizeObserver>();
+  const renderer = useRef<p5>();
+
+  useEffect(() => {
+    if (canvasContainerRef.current) {
+      renderer.current = rendererP5(canvasContainerRef.current, {
+        background: "transparent",
+      });
+
+      observerRef.current = new ResizeObserver(
+        (entries: ResizeObserverEntry[]) => {
+          console.log("observer");
+          for (const _ of entries) {
+            if (!canvasContainerRef.current) return;
+
+            const canvasContainer = canvasContainerRef.current;
+
+            setDimensions({
+              width: canvasContainer.clientWidth,
+              height: canvasContainer.clientHeight,
+            });
+          }
+        }
+      );
+
+      observerRef.current.observe(canvasContainerRef.current);
+
+      return () => {
+        // rendererRef.current?.destroy();
+        observerRef.current?.disconnect();
+      };
+    }
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <main>
+        <div className="canvas-container" ref={canvasContainerRef}></div>
+      </main>
     </div>
   );
 }
