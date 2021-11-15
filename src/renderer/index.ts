@@ -1,4 +1,5 @@
-import p5 from "p5";
+import p5 from 'p5';
+// import { mapKeys } from "lodash-es";
 
 interface SkeletonRendererOptions {
   background?: string;
@@ -13,7 +14,7 @@ interface Dimension {
 
 let x = 100;
 let y = 100;
-let options: SkeletonRendererOptions;
+
 let fabrics = [];
 let fabricsKeys = [];
 let initialized = false;
@@ -22,87 +23,93 @@ let initialized = false;
 
 const s = (p: p5) => {
   p.setup = function () {
-    p.createCanvas(
-      options.dimension?.width || 128,
-      options.dimension?.height || 96
-    );
+    p.createCanvas(128, 96);
+    p.noLoop();
   };
 
   p.draw = function () {
-    p.resizeCanvas(
-      options.dimension?.width || 128,
-      options.dimension?.height || 96
-    );
     p.background(0);
-    p.fill(255);
-    p.rect(x, y, 50, 50);
-    p.circle(30, 30, 20);
   };
 };
 
-let myp5 = (node: HTMLElement, opt: SkeletonRendererOptions) => {
-  options = { ...opt };
-  options.dimension = { width: 128, height: 96 };
-  options.offset = { x: 0.2, y: 0.2 };
+let myp5 = (node: HTMLElement) => {
   return new p5(s, node);
 };
 
-export const setDimensions = (dimensions: Dimension) => {
-  const { width, height } = dimensions;
-  console.log("dimension");
+class renderer {
+  private p5: p5;
+  private options: SkeletonRendererOptions;
+  //   private fabrics: Array<Line | Circle>;
+  //   private fabricsKeys: string[];
+  //   private initialized: boolean;
 
-  options.offset = {
-    x: (height * (4 / 3)) / 640,
-    y: height / 480,
+  constructor(node: HTMLElement, options: SkeletonRendererOptions) {
+    // this.p5 = new p5(this.sketch, node);
+
+    this.p5 = myp5(node);
+    this.options = { ...options };
+    // this.fabrics = [];
+    // this.fabricsKeys = [];
+    // this.initialized = false;
+    this.options.dimension = { width: 128, height: 96 };
+    this.options.offset = { x: 0.2, y: 0.2 };
+    // this.canvas.setDimensions(this.options.dimension);
+  }
+
+  public render() {
+    this.drawFacePoint(10, Math.floor(Math.random() * 100), 'eye', true);
+    this.drawJoint(Math.floor(Math.random() * 100), 30, 'hip', true, true, true);
+    this.drawLine([2, 5, Math.floor(Math.random() * 100), 44], 'leftArm', true);
+  }
+
+  public setDimensions = (dimensions: Dimension) => {
+    const { width, height } = dimensions;
+
+    this.options.offset = {
+      x: (height * (4 / 3)) / 640,
+      y: height / 480,
+    };
+
+    this.p5.resizeCanvas(height * (4 / 3), height);
+    //   this.canvas.calcOffset();
   };
 
-  options.dimension = {
-    width: height * (4 / 3),
-    height,
+  private drawJoint = (x: number, y: number, name: string, modifiable: boolean, isLeft: boolean, visible: boolean) => {
+    if (!visible) return;
+    this.p5.fill(isLeft ? '#CC1937' : '#1860CC');
+    this.p5.stroke('#FFF');
+    this.p5.strokeWeight(Math.max(0.5, (0.5 * (this.options.offset!.x + this.options.offset!.y)) / 2));
+    this.p5.circle(x, y, Math.max(2, (2 * (this.options.offset!.x + this.options.offset!.y)) / 2));
   };
 
-  //   this.canvas.calcOffset();
-};
+  private drawFacePoint = (x: number, y: number, name: string, visible: boolean) => {
+    if (!visible) return;
+    this.p5.fill('#fff');
+    this.p5.stroke('#8100ff');
+    this.p5.strokeWeight(Math.max(0.5, (0.5 * (this.options.offset!.x + this.options.offset!.y)) / 2));
+    this.p5.circle(x, y, Math.max(2, (2 * (this.options.offset!.x + this.options.offset!.y)) / 2));
+  };
 
-export default myp5;
+  private drawLine = (coords: number[], name: string, visible: boolean) => {
+    if (!visible) return;
+    this.p5.stroke('#8100ff');
+    this.p5.strokeWeight(Math.max(3, (3 * (this.options.offset!.x + this.options.offset!.y)) / 2));
+    this.p5.line(coords[0], coords[1], coords[2], coords[3]);
+  };
+}
 
-// class renderer {
-//   private p5: p5;
-//   private options: SkeletonRendererOptions;
-//   private yPos: number;
-//   //   private fabrics: Array<Line | Circle>;
-//   //   private fabricsKeys: string[];
-//   //   private initialized: boolean;
+class joint {
+  private p5: p5;
+  private name: string;
+  private bg: string;
+  private color: string;
+  constructor(p5: p5, x: number, y: number, name: string, modifiable: boolean, isLeft: boolean, visible: boolean) {
+    this.p5 = p5;
+    this.name = name;
+    this.bg = isLeft ? '#CC1937' : '#1860CC';
+    this.color = '#FFF';
+  }
+}
 
-//   constructor(node: HTMLElement, options: SkeletonRendererOptions) {
-//     // this.p5 = new p5(this.sketch, node);
-
-//     this.p5 = myp5(node);
-//     this.options = { ...options };
-//     // this.fabrics = [];
-//     // this.fabricsKeys = [];
-//     // this.initialized = false;
-//     this.yPos = 0;
-//     this.options.dimension = { width: 128, height: 96 };
-//     this.options.offset = { x: 0.2, y: 0.2 };
-//     // this.canvas.setDimensions(this.options.dimension);
-//   }
-
-//   draw() {
-//     // this.p5.background(204);
-//     // this.yPos = this.yPos - 1;
-//     // if (this.yPos < 0) {
-//     //   this.yPos = this.p5.height;
-//     // }
-//     // this.p5.line(0, this.yPos, this.p5.width, this.yPos);
-
-//     x = x + 1;
-//     y = y + 1;
-//   }
-
-//   public render() {
-//     this.p5.draw();
-//   }
-// }
-
-// export default renderer;
+//  circle, line 클래스 생성 -> 배열 ->
+export default renderer;

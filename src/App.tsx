@@ -1,34 +1,38 @@
-import React, { useEffect, useRef } from "react";
-import p5 from "p5";
-import rendererP5, { setDimensions } from "./renderer/index";
-import "./App.css";
+import React, { MouseEvent, useEffect, useRef } from 'react';
+import p5 from 'p5';
+import rendererP5 from './renderer/index';
+import './App.css';
 
 function App() {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<ResizeObserver>();
-  const renderer = useRef<p5>();
+  const renderer = useRef<rendererP5>();
+
+  const onBtn = (evt: MouseEvent) => {
+    evt.preventDefault();
+    if (!renderer.current) return;
+    renderer.current.render();
+  };
 
   useEffect(() => {
     if (canvasContainerRef.current) {
-      renderer.current = rendererP5(canvasContainerRef.current, {
-        background: "transparent",
+      renderer.current = new rendererP5(canvasContainerRef.current, {
+        background: 'transparent',
       });
 
-      observerRef.current = new ResizeObserver(
-        (entries: ResizeObserverEntry[]) => {
-          console.log("observer");
-          for (const _ of entries) {
-            if (!canvasContainerRef.current) return;
+      observerRef.current = new ResizeObserver((entries: ResizeObserverEntry[]) => {
+        console.log('observer');
+        for (const _ of entries) {
+          if (!canvasContainerRef.current) return;
 
-            const canvasContainer = canvasContainerRef.current;
+          const canvasContainer = canvasContainerRef.current;
 
-            setDimensions({
-              width: canvasContainer.clientWidth,
-              height: canvasContainer.clientHeight,
-            });
-          }
+          renderer.current?.setDimensions({
+            width: canvasContainer.clientWidth,
+            height: canvasContainer.clientHeight,
+          });
         }
-      );
+      });
 
       observerRef.current.observe(canvasContainerRef.current);
 
@@ -42,6 +46,7 @@ function App() {
   return (
     <div className="App">
       <main>
+        <button onClick={onBtn}>그리기</button>
         <div className="canvas-container" ref={canvasContainerRef}></div>
       </main>
     </div>
