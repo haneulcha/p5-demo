@@ -2,6 +2,7 @@ import React, { MouseEvent, useEffect, useRef } from 'react';
 import p5 from 'p5';
 import rendererP5 from './renderer/index';
 import './App.css';
+import { getCameraPermission, getUserMedia } from './util/user-env';
 
 function App() {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -41,6 +42,11 @@ function App() {
         observerRef.current?.disconnect();
       };
     }
+  }, []);
+
+  useEffect(() => {
+    getCameraPermission();
+    getUserMedia();
   }, []);
 
   return (
