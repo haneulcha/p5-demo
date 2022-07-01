@@ -1,7 +1,13 @@
-export async function getCameraPermission() {
+export async function getCameraPermissionState() {
   const permissionName = 'camera' as PermissionName;
-  const result = await navigator.permissions.query({ name: permissionName });
-  console.log({ result });
+
+  try {
+    const result = await navigator.permissions.query({ name: permissionName });
+    return result.state;
+  } catch (error) {
+    const devices = await getAvailableDevices();
+    return devices.length ? 'granted' : undefined;
+  }
 }
 
 export async function getUserMedia(
@@ -20,4 +26,17 @@ export async function getUserMedia(
       }
     }
   }
+}
+
+async function getAvailableDevices() {
+  let availableDevices: { deviceId: string; label: string }[] = [];
+  const devices = await navigator.mediaDevices.enumerateDevices();
+
+  devices.forEach(device => {
+    if (device.kind === 'videoinput' && device.deviceId) {
+      availableDevices.push({ deviceId: device.deviceId, label: device.label });
+    }
+  });
+
+  return availableDevices;
 }

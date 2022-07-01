@@ -1,8 +1,8 @@
-import React, { MouseEvent, useEffect, useRef } from 'react';
+import React, { MouseEvent, useEffect, useRef, useState } from 'react';
 import p5 from 'p5';
 import rendererP5 from './renderer/index';
 import './App.css';
-import { getCameraPermission, getUserMedia } from './util/user-env';
+import { getCameraPermissionState } from './util/user-env';
 
 function App() {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -45,8 +45,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    getCameraPermission();
-    getUserMedia();
+    const init = async () => {
+      const permissionState = await getCameraPermissionState();
+    };
+    init();
   }, []);
 
   return (
@@ -54,6 +56,7 @@ function App() {
       <main>
         <button onClick={onBtn}>그리기</button>
         <div className="canvas-container" ref={canvasContainerRef}></div>
+        <button type="button">카메라</button>
       </main>
     </div>
   );
