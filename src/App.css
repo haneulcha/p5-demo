@@ -38,7 +38,10 @@
 }
 
 .canvas-container {
-  width: 600px;
-  height: 400px;
+  outline: 1px solid #000;
   background-color: ivory;
+}
+
+#canvas {
+  outline: 1px solid #000;
 }

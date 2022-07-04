@@ -11,11 +11,15 @@ export async function getCameraPermissionState() {
 }
 
 export async function getUserMedia(
-  constraints: MediaStreamConstraints = { video: true, audio: false },
+  constraints: MediaStreamConstraints = { video: { facingMode: 'user' }, audio: false },
 ): Promise<MediaStream | void> {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    throw new Error('Browser API navigator.mediaDevices.getUserMedia not available');
+  }
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    console.log({ stream });
+    return stream;
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
