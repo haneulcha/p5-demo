@@ -48,7 +48,7 @@ class PoseDetect {
       };
       const poses = await this.detector?.estimatePoses(this.video, estimationConfig);
       this.poses = poses;
-      p5PoseUpdate(poses);
+      if (poses.length) p5PoseUpdate(poses[0]);
     } catch (error) {
       this.detector.dispose();
       this.detector = null;

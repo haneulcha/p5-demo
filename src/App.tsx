@@ -2,14 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import './App.css';
 import { getCameraPermissionState, getUserMedia } from './util/user-env';
 import PoseDetect from './lib/pose-detect';
-import initP5 from './lib/renderer';
+import initP5, { p5CanvasSize } from './lib/renderer';
 
 function App() {
   const [isInitialized, setInitialized] = useState(false);
   const cameraRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream>();
   const canvasContainerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const observerRef = useRef<ResizeObserver>();
   const [poseDetector, setPoseDetector] = useState<PoseDetect | null>(null);
   // const renderer = useRef<rendererP5>();
@@ -57,8 +57,8 @@ function App() {
       await poseDetector.startEstimate();
     };
 
-    // estimate();
-    // initP5();
+    estimate();
+    initP5(canvasContainerRef?.current ?? undefined);
   }, [isInitialized, poseDetector]);
 
   useEffect(() => {
@@ -79,15 +79,12 @@ function App() {
         };
       });
 
+      p5CanvasSize(camera.videoWidth, camera.videoHeight);
+
       // detector load
       const detector = new PoseDetect(camera);
       await detector.createDetector();
       setPoseDetector(detector);
-
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      canvas.width = camera.videoWidth;
-      canvas.height = camera.videoHeight;
     };
 
     const init = async () => {
@@ -104,9 +101,7 @@ function App() {
     <div className="App">
       <main>
         {/* <button onClick={onBtn}>그리기</button> */}
-        <div id="canvas-container" ref={canvasContainerRef}>
-          {/* <canvas id="canvas" ref={canvasRef}></canvas> */}
-        </div>
+        <div id="canvas-container" ref={canvasContainerRef}></div>
         <div className="camera-container">
           <video ref={cameraRef} autoPlay />
         </div>
